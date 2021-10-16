@@ -1,6 +1,6 @@
-import { client } from "./ApolloClient/client";
+import { client } from "./foundation/ApolloClient/client";
 import { ApolloProvider } from '@apollo/client';
-import { Race } from "./Race";
+import { Race } from "./components/Race";
 
 
 const App = () => (

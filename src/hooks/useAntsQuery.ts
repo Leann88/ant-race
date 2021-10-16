@@ -11,13 +11,10 @@ query ants {
 }
 `;
 export const useAntsQuery = () => {
-
-    const { loading, error, data } = useQuery(GET_ANTS);
-
+    const { data, loading, error } = useQuery(GET_ANTS);
     return {
-        ants: data?.ants || [],
-        loading,
-        error
+        data,
+        error,
+        loading
     }
-
 }

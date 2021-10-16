@@ -1,0 +1,26 @@
+.container {
+    display: flex;
+    flex-direction: column;
+}
+.ant-details {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+ul {
+    list-style-type: none;
+}
+
+.image {
+    width: 50px;
+    height: 50px;
+}
+
+.silver {
+    filter: invert(92%) sepia(0%) saturate(38%) hue-rotate(129deg) brightness(87%) contrast(88%);;
+}
+
+.red {
+    filter: invert(20%) sepia(86%) saturate(5645%) hue-rotate(355deg) brightness(96%) contrast(121%);
+}
