@@ -76,28 +76,41 @@ export const Race = () => {
     }
 
     const renderButton = () => {
-        if (!calculating)
+        if (!calculating && !calculated)
             return <button className="start-button" onClick={calculateStats}>Start a Race</button>;
         if (calculated)
             return <button className="reset-button" onClick={reset}>Reset Race</button>;
     }
 
     const renderAnts = () => {
-
         return ants.map((ant: Racer, index: number) => {
-            let status = "";
+            let status = `Likelihood of winning: ${ant.likelihoodOfWinning}`;
 
             if (calculating && !ant.likelihoodOfWinning)
-                status = 'Calculating';
+                status = 'In progress';
+
+            if (!calculated && !calculating)
+                status = "Not yet run";
 
             return <Ant details={ant} status={status} />
         });
+    }
+
+    const getRaceStatus = () => {
+        if (calculating)
+            return "In progress";
+
+        if (calculated)
+            return "All calculated";
+
+        return "Not yet run";
     }
 
     return (
         <div>
             <div>
                 <h1 className="title">Ant Race</h1>
+                <div className="message">{getRaceStatus()}</div>
                 <div className="ant-racers">
                     {renderAnts()}
                 </div>
@@ -108,5 +121,4 @@ export const Race = () => {
             </div>
         </div>
     )
-
 };
