@@ -1,4 +1,5 @@
 
+import { Box, Button, CircularProgress, AppBar, Toolbar, CssBaseline, Paper, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useAntsQuery } from "../../hooks/useAntsQuery";
 import { Racer } from "../../types";
@@ -19,7 +20,7 @@ export const Race = () => {
                 length: ant.length,
                 color: ant.color,
                 weight: ant.weight,
-                likelihoodOfWinning: 0,
+                likelihoodOfWinning: null,
                 progressBarColor: generateRandomColor(),
             }
         )) || [];
@@ -29,7 +30,7 @@ export const Race = () => {
 
 
     if (loading) {
-        return <div>loading</div>;
+        return <CircularProgress />
     }
 
     if (error) {
@@ -60,14 +61,22 @@ export const Race = () => {
         });
     }
 
-    const mostLikelyWinner = () => {
-        ants.sort((a: Racer, b: Racer) => b.likelihoodOfWinning - a.likelihoodOfWinning);
-        return ants[0]?.name;
+    const sortedAnts = () => {
+        const sortedAntsArr = [...ants];
+        return sortedAntsArr.sort((a: Racer, b: Racer) => {
+            if (a.likelihoodOfWinning === null)
+                return 1;
+
+            if (b.likelihoodOfWinning === null)
+                return -1;
+
+            return b.likelihoodOfWinning - a.likelihoodOfWinning
+        });
     }
 
     const reset = () => {
         const newArr = [...ants];
-        newArr.forEach((ant) => ant.likelihoodOfWinning = 0);
+        newArr.forEach((ant) => ant.likelihoodOfWinning = null);
 
         setAnts(newArr);
         setCalculating(false);
@@ -76,14 +85,30 @@ export const Race = () => {
     }
 
     const renderButton = () => {
-        if (!calculating && !calculated)
-            return <button className="start-button" onClick={calculateStats}>Start a Race</button>;
         if (calculated)
-            return <button className="reset-button" onClick={reset}>Reset Race</button>;
+            return (
+                <Button
+                    size="large"
+                    sx={{ borderColor: 'white', color: 'white' }}
+                    variant="outlined" onClick={reset}>
+                    Reset Race
+                </Button>
+            );
+
+        return (
+            <Button
+                size="large"
+                disabled={calculating}
+                sx={{ borderColor: 'white', color: 'white' }}
+                variant="outlined"
+                onClick={calculateStats}>
+                {calculating ? "Calculating..." : "Start race"}
+            </Button>
+        );
     }
 
     const renderAnts = () => {
-        return ants.map((ant: Racer, index: number) => {
+        return sortedAnts().map((ant: Racer) => {
             let status = `Likelihood of winning: ${ant.likelihoodOfWinning}`;
 
             if (calculating && !ant.likelihoodOfWinning)
@@ -108,17 +133,24 @@ export const Race = () => {
 
     return (
         <div>
-            <div>
-                <h1 className="title">Ant Race</h1>
+            <Box sx={{ flexGrow: 1 }}>
+                <AppBar position="fixed">
+                    <Toolbar>
+                        <Typography variant="h5" gutterBottom component="div" sx={{ flexGrow: 1, alignSelf: 'flex-end' }}>
+                            Ant Race
+                        </Typography>
+                        {renderButton()}
+                    </Toolbar>
+                </AppBar>
+            </Box>
+            <Toolbar />
+            <CssBaseline />
+            <Paper square sx={{ pb: '50px' }}>
                 <div className="message">{getRaceStatus()}</div>
                 <div className="ant-racers">
                     {renderAnts()}
                 </div>
-            </div>
-            {renderButton()}
-            <div>
-                {calculated && mostLikelyWinner()}
-            </div>
+            </Paper>
         </div>
     )
 };

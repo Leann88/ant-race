@@ -3,6 +3,6 @@ export interface Racer {
     length: number;
     color: string;
     weight: number;
-    likelihoodOfWinning: number;
+    likelihoodOfWinning: number | null;
     progressBarColor: string;
 }
