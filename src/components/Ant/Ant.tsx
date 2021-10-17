@@ -1,10 +1,9 @@
 
 import ProgressBar from "@ramonak/react-progress-bar";
-import { Avatar, Card, CardHeader, CardContent, Typography } from "@mui/material";
+import { Avatar, Card, CardHeader, Typography } from "@mui/material";
 import { Racer } from "../../types";
 import antSVG from '../../assets/ant.svg';
 import './Ant.css';
-
 
 interface Props {
     details: Racer;
@@ -20,7 +19,6 @@ export const Ant = ({ details, status }: Props) => {
                 avatar={
                     <Avatar src={antSVG} className={`${color.toLowerCase()}`} sx={{ width: 45, height: 45 }} variant="square" />
                 }
-
                 title={name}
                 subheader={
                     <>

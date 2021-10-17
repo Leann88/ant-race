@@ -1,7 +1,8 @@
 
+import { useLazyQuery } from "@apollo/client";
 import { AppBar, Box, Button, CircularProgress, LinearProgress, Toolbar, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
-import { useAntsQuery } from "../../hooks/useAntsQuery";
+import { antsQuery } from "../../graphql/antsQuery";
 import { Racer } from "../../types";
 import { generateAntWinLikelihoodCalculator } from "../../utils/generateAntWinLikelihoodCalculator";
 import { generateRandomColor } from "../../utils/generateRandomColor";
@@ -11,7 +12,11 @@ export const Race = () => {
     const [ants, setAnts] = useState<Racer[]>([]);
     const [calculating, setCalculating] = useState<boolean>(false);
     const [calculated, setCalculated] = useState<boolean>(false);
-    const { loading, error, data } = useAntsQuery();
+    const [antsFetched, setAntsFetched] = useState<boolean>(false);
+    const [antDataQuery, { loading, error, data }] = useLazyQuery(antsQuery, {
+        onCompleted: () => { setAntsFetched(true) },
+        fetchPolicy: 'network-only'
+    });
 
     useMemo(() => {
         const antArr: Racer[] = data?.ants?.map((ant: Racer) => (
@@ -24,15 +29,6 @@ export const Race = () => {
 
         setAnts(antArr)
     }, [data])
-
-
-    if (loading) {
-        return (
-            <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'center', alignItems: 'center', height: '90vh' }}>
-                <CircularProgress />
-            </Box>
-        )
-    }
 
     if (error) {
         return <div>{error}</div>;
@@ -50,7 +46,7 @@ export const Race = () => {
                 setAnts(newArr);
                 calculatedCount++;
 
-                if (calculatedCount === ants.length) {
+                if (ants && calculatedCount === ants.length) {
                     setCalculated(true);
                     setCalculating(false);
                 }
@@ -72,22 +68,37 @@ export const Race = () => {
     }
 
     const reset = () => {
-        const newArr = [...ants];
-        newArr.forEach((ant) => ant.likelihoodOfWinning = null);
-        setAnts(newArr);
+        setAnts([]);
         setCalculating(false);
         setCalculated(false);
+        setAntsFetched(false);
     }
 
-    const renderButton = () =>
-        <Button
-            size="large"
-            disabled={calculating}
-            sx={{ borderColor: 'white', color: 'white' }}
-            variant="outlined"
-            onClick={calculated ? reset : calculateStats}>
-            {calculated ? "Reset Race" : calculating ? "Calculating..." : "Start race"}
-        </Button>
+    const renderButton = () => {
+        if (!antsFetched) {
+            return (
+                <Button
+                    size="large"
+                    disabled={loading}
+                    sx={{ borderColor: 'white', color: 'white' }}
+                    variant="outlined"
+                    onClick={() => antDataQuery()}>
+                    {loading ? "Finding racers.." : "Begin!"}
+                </Button>
+            )
+        }
+
+        return (
+            <Button
+                size="large"
+                disabled={calculating}
+                sx={{ borderColor: 'white', color: 'white' }}
+                variant="outlined"
+                onClick={calculated ? reset : calculateStats}>
+                {calculated ? "Reset Race" : calculating ? "Calculating..." : "Start race"}
+            </Button>
+        )
+    }
 
     const renderAnts = () => {
         return sortedAnts().map((ant: Racer, index: number) => {
@@ -104,6 +115,7 @@ export const Race = () => {
     }
 
     const getRaceStatus = () => {
+
         if (calculating)
             return (
                 <Box>
@@ -114,13 +126,23 @@ export const Race = () => {
                 </Box>
             );
 
+        let status = '';
+
+        if (loading)
+            status = "Finding racers";
+
+        if (!antsFetched && !loading)
+            status = "Welcome to the ant race, click Begin!"
+
+        if (calculated)
+            status = `Race has finished! ${sortedAnts()[0].name} is the most likely winner`
+
+        if (!calculated && antsFetched)
+            status = "Race has not yet run, click Start Race!"
 
         return (
             <Typography variant="h5" component="div">
-                {calculated ?
-                    `Race has finished! ${sortedAnts()[0].name} is the most likely winner` :
-                    "Race has not yet run, click Start Race!"
-                }
+                {status}
             </Typography>
         );
     }
@@ -139,7 +161,12 @@ export const Race = () => {
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '10vh' }}>
                 {getRaceStatus()}
             </Box>
-            {renderAnts()}
+            {loading ? (
+                <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <CircularProgress />
+                </Box>) :
+                renderAnts()
+            }
         </div>
     )
 };
