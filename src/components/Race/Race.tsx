@@ -63,11 +63,9 @@ export const Race = () => {
     const sortedAnts = () => {
         const sortedAntsArr = [...ants];
         return sortedAntsArr.sort((a: Racer, b: Racer) => {
-            if (a.likelihoodOfWinning === null)
-                return 1;
+            if (a.likelihoodOfWinning === null) return 1;
 
-            if (b.likelihoodOfWinning === null)
-                return -1;
+            if (b.likelihoodOfWinning === null) return -1;
 
             return b.likelihoodOfWinning - a.likelihoodOfWinning
         });
@@ -93,9 +91,9 @@ export const Race = () => {
 
     const renderAnts = () => {
         return sortedAnts().map((ant: Racer, index: number) => {
-            let status = `Likelihood of winning: ${ant.likelihoodOfWinning}`;
+            let status = `Likelihood of winning: ${(ant.likelihoodOfWinning || 0) * 100}`;
 
-            if (calculating && !ant.likelihoodOfWinning)
+            if (calculating && ant.likelihoodOfWinning === null)
                 status = 'In progress';
 
             if (!calculated && !calculating)
