@@ -16,6 +16,7 @@ export const Race = () => {
     const [antDataQuery, { loading, error, data }] = useLazyQuery(antsQuery, {
         onCompleted: () => { setAntsFetched(true) },
         fetchPolicy: 'network-only'
+        
     });
 
     useMemo(() => {
